@@ -22,7 +22,7 @@ library(ggplot2)
 library(scales)
 
 #Scatterplot of PriorityScore by Total.Due with smoother line to show relationship
-qplot(PriorityScore,Total.Due, data=df, geom = c("point", "smooth"))
+qplot(DollarScore,Total.Due, data=df, geom = c("point", "smooth"))
 
 #Why is expected dollar score greater than Total.Due?
 df2 <- df[which(!is.na(df$PriorityScore)), c("Total.Due", "PriorityScore")]
