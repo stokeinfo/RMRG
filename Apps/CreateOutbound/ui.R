@@ -20,15 +20,20 @@ shinyUI(fluidPage(
       ),
     
     mainPanel(
-#       downloadButton('CBCoutbound', 'Download CBC Outbound file'),
+#       downloadButton('CBCoutbound', label = 'Download CBC Outbound file'),
 #       br(),br(),
-#       downloadButton('ONECLICKoutbound', 'Download OneClick outbound file'),
+#       downloadButton('ONECLICKoutbound', label = 'Download OneClick outbound file'),
 #       br(),br(),
-#       downloadButton('EXPERIANoutbound', 'Download Experian outbound file'),
+#       downloadButton('EXPERIANoutbound', label = 'Download Experian outbound file'),
 #       br(),br(),
-#       downloadButton('WEBRECONoutbound', 'Download WebRecon outbound file'),
+#       downloadButton('WEBRECONoutbound', label = 'Download WebRecon outbound file'),
 #       br(),br(),
-      tableOutput("masterHead")
+      downloadButton('CBCoutDL', label = 'Download CBC Outbound file')
+#       h2("CBC outbound preview"),
+#       tableOutput("CBCoutboundHead")
+#       br(),br(),
+#       downloadButton('CBCoutbound', label = 'Download CBC Outbound file'),
+      
     )
   )
 ))
