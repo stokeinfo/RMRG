@@ -1,9 +1,9 @@
-prepmaster <- function(){
+prepmaster <- function(master){
   
-  setwd("C:/Users/Jonathan/Desktop/Stoke Informatics/Clients/RMRG")
-  
-  #read in master
-  master <- read.csv("052014-RMRG Purchase.csv", sep=",", header=TRUE, stringsAsFactors=FALSE)
+#   setwd("C:/Users/Jonathan/Desktop/Stoke Informatics/Clients/RMRG")
+#   
+#   #read in master
+#   master <- read.csv("052014-RMRG Purchase.csv", sep=",", header=TRUE, stringsAsFactors=FALSE)
   
   #which columns start with "X"... delete
   deletecolumns <- grep("^X", names(master))

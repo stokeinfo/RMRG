@@ -28,7 +28,7 @@ shinyUI(fluidPage(
 #       br(),br(),
 #       downloadButton('WEBRECONoutbound', 'Download WebRecon outbound file'),
 #       br(),br(),
-      tableOutput("masterStructure")
+      tableOutput("masterHead")
     )
   )
 ))

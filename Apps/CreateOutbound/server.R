@@ -4,15 +4,24 @@
 #load required libraries
 library(shiny)
 
-# #source required scripts
-# source("prepmaster.R")
-# source("createoutbound.R")
+#source required scripts
+source("prepmaster.R")
+#source("createoutbound.R")
 
 # Define server logic required
 shinyServer(function(input, output) {
   
-  output$masterStructure <- renderTable({
+  output$masterHead <- renderTable({
     
-    input$master    
+    inFile <- input$master
+    
+    if (is.null(inFile))
+      return(NULL)
+    
+    master <- read.csv(inFile$datapath, sep=",", header=TRUE, stringsAsFactors=FALSE, nrows=6)
+    
+    #remove all the trailing columns with X names with prepmaster.R
+    prepmaster(master)
+    
   })  
 })
