@@ -14,10 +14,17 @@ shinyUI(fluidPage(
       p("RMRG web-app for creating outbound data files from default master 
         data template"),
       
-      #INPUT WIDGET
+      #UPLOAD MASTER FILE INPUT WIDGET
       fileInput("master", label = h3("Upload Master Data File")), 
-      p(strong("Note: Master file must be a .csv file and formatted in the RMRG default template format"))
-      ),
+      p(strong("Note: Master file must be a .csv file and formatted in the RMRG default template format")),
+    
+      selectInput("outboundfile", 
+                  label = "Choose an outbound file to format",
+                  choices = list("CBCoutbound",
+                                 "EXPERIANoutbound",
+                                 "ONECLICKoutbound",
+                                 "WEBRECONoutbound"),
+                  selected = "CBCoutbound")),
     
     mainPanel(
 #       downloadButton('CBCoutbound', label = 'Download CBC Outbound file'),
