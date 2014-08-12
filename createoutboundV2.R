@@ -169,7 +169,7 @@ createoutbound <- function(master){
   EXPERIANoutbound$ASSIGNED <- ASSIGNED
   
   #Filename must be CA.C0550263.S2299570.FILE1.TXT
-  write.table(EXPERIANoutbound, "./TSLOoutbound/CA.C0550263.S2299570.FILE1.TXT", sep=",", na="", row.names=FALSE, col.names=FALSE)
+  write.table(EXPERIANoutbound, "./TSLOoutbound/CA.C0550263.S2299570.FILE1.TXT", sep=",", na="", row.names=FALSE, col.names=FALSE, quote=FALSE)
   
   
   ########OneClick Outbound########
