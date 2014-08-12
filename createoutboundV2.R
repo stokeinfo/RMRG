@@ -102,7 +102,6 @@ createoutbound <- function(master){
   #SCOREoutbound$LastPaymentAmnt <- NA
   
   #adding in placeholder columns
-  SCOREoutbound$p66 <- NA
   SCOREoutbound$p96 <- NA
   SCOREoutbound$p169 <- NA
   SCOREoutbound$p238 <- NA
@@ -131,7 +130,7 @@ createoutbound <- function(master){
   
   
   #Subset in required order by names in SCOREoutbound
-  EXPERIANoutbound <- SCOREoutbound[, c("RecordFormat", "RecordLength", "SubCode","ACCT", "p66", "p96", "LNAME", "FNAME", "p169", "ADD1",
+  EXPERIANoutbound <- SCOREoutbound[, c("RecordFormat", "RecordLength", "SubCode","ACCT", "p96", "LNAME", "FNAME", "p169", "ADD1",
                                         "p238", "CITY", "STATE", "ZIP", "p307", "2HKeyword", "p329", "p331", "p332", "p333", "p334",
                                         "p335", "p336", "p337", "p338", "ModelScore1", "p341", "p343", "p349", "p351", "p353", "p370",
                                         "HOMEAC", "HOMEPHONE", "p381", "p384", "POEAC", "POEPHONE", "p401", "LSTPMNTDATE",
