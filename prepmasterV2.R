@@ -3,7 +3,11 @@ prepmaster <- function(){
   setwd("C:/Users/Jonathan/Desktop/Stoke Informatics/Clients/RMRG")
   
   #read in master
-  master <- read.csv("052014-RMRG Purchase.csv", sep=",", header=TRUE, stringsAsFactors=FALSE)
+  dir <- "C:/Users/Jonathan/Desktop/Stoke Informatics/Clients/RMRG/72313"
+  setwd(dir)
+  
+  
+  master <- read.csv("TSLO 07232014.csv", sep=",", header=TRUE, stringsAsFactors=FALSE)
   
   #which columns start with "X"... delete
   deletecolumns <- grep("^X", names(master))

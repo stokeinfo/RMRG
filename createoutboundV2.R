@@ -5,12 +5,12 @@ createoutbound <- function(master){
   
   #######CBC Outbound#######
   
-  CBCoutboundNames <- c("SSN", "FNAM", "LNAM", "ADD1", "CITY", "STATE",
+  CBCoutboundNames <- c("SSN", "FNAME", "LNAME", "ADD1", "CITY", "STATE",
                         "ZIP", "HOMEPHONE", "MOBILEPHONE", "ADDPHONE1", "ADDPHONE2", "ADDPHONE3",
                         "ADDPHONE4", "ADDPHONE5", "ADDPHONE6")
   
   #subset master to create CBCoutbound
-  CBCoutbound <- master[, c("SSN", "FNAM", "LNAM", "ADD1", "CITY", "STATE", "ZIP", 
+  CBCoutbound <- master[, c("SSN", "FNAME", "LNAME", "ADD1", "CITY", "STATE", "ZIP", 
                             "HOMEPHONE", "MOBILEPHONE")]
   
   #adding in extra "out_MobilePhone" columns
@@ -24,14 +24,19 @@ createoutbound <- function(master){
   colnames(CBCoutbound) <- CBCoutboundNames
   # colnames(CBCoutbound)[10:15] <- "out_MobilePhone"
   
-  #remove duplicate SSNs
-  CBCoutbound <- CBCoutbound[!duplicated(CBCoutbound$SSN), ]
+#   since keys are now ACCT, do not need to remove duplicate SSN
+#   #remove duplicate SSNs
+#   CBCoutbound <- CBCoutbound[!duplicated(CBCoutbound$SSN), ]
   
   # #validation
   # which(df$SSN %in% unique(CBCoutbound$SSN[duplicated(CBCoutbound$SSN)]))
   
+  if(!file.exists("TSLOoutbound")){
+    dir.create("TSLOoutbound")
+  }
+  
   #create outbound csv
-  write.csv(CBCoutbound, "./scripts/prepped_outbound/CBCoutbound.csv", row.names=FALSE)
+  write.csv(CBCoutbound, paste("./TSLOoutbound/", "CBCoutbound_", Sys.Date(), ".csv", sep=""), row.names=FALSE)
   
   
   ########Credit Score Outbound########
@@ -45,8 +50,8 @@ createoutbound <- function(master){
   
   #Subset master with appropriate master data
   #no SSN number???
-  SCOREoutbound <- master[, c("ACCT","LNAM", "FNAM",  "ADD1", "CITY", "STATE", "ZIP", "HOMEPHONE",
-                              "POEPHONE", "CHGOFFDATE", "ASSIGNED", "LOANDATE", "POE", "LSTPMTDATE",
+  SCOREoutbound <- master[, c("ACCT","LNAME", "FNAME",  "ADD1", "CITY", "STATE", "ZIP", "HOMEPHONE",
+                              "POEPHONE", "CHGOFFDATE", "ASSIGNED", "LOANDATE", "POE", "LSTPMNTDATE",
                               "LSTPMTAMT")]
   
   #need to split area codes from home and work phone number
@@ -57,8 +62,15 @@ createoutbound <- function(master){
   HOMEAC <- substr(SCOREoutbound$HOMEPHONE, 1,3)
   POEAC <- substr(SCOREoutbound$POEPHONE, 1,3)
   #add in area code columns
-  SCOREoutbound$HOMEareacode <- HOMEareacode
-  SCOREoutbound$POEareacode <- POEareacode
+  SCOREoutbound$HOMEAC <- HOMEAC
+  SCOREoutbound$POEAC <- POEAC
+  
+  
+  ###This block is temporary to remove space between AC and phone number from TSLO list
+  SCOREoutbound$HOMEPHONE <- gsub(" ", "", SCOREoutbound$HOMEPHONE)
+  SCOREoutbound$POEPHONE <- gsub(" ", "", SCOREoutbound$POEPHONE)
+  ###
+
   #delete area code from phone numbers
   SCOREoutbound$HOMEPHONE <- substr(SCOREoutbound$HOMEPHONE,4,10)
   SCOREoutbound$POEPHONE <- substr(SCOREoutbound$POEPHONE,4,10)
@@ -119,10 +131,10 @@ createoutbound <- function(master){
   
   
   #Subset in required order by names in SCOREoutbound
-  EXPERIANoutbound <- SCOREoutbound[, c("RecordFormat", "RecordLength", "SubCode","ACCT", "p66", "p96", "LNAM", "FNAM", "p169", "ADD1",
+  EXPERIANoutbound <- SCOREoutbound[, c("RecordFormat", "RecordLength", "SubCode","ACCT", "p66", "p96", "LNAME", "FNAME", "p169", "ADD1",
                                         "p238", "CITY", "STATE", "ZIP", "p307", "2HKeyword", "p329", "p331", "p332", "p333", "p334",
                                         "p335", "p336", "p337", "p338", "ModelScore1", "p341", "p343", "p349", "p351", "p353", "p370",
-                                        "HOMEAC", "HOMEPHONE", "p381", "p384", "POEAC", "POEPHONE", "p401", "LSTPMTDATE",
+                                        "HOMEAC", "HOMEPHONE", "p381", "p384", "POEAC", "POEPHONE", "p401", "LSTPMNTDATE",
                                         "CHGOFFDATE", "ASSIGNED", "LOANDATE", "POE", "PlacementStatus", "DebtType",
                                         "POEAddressIndicator", "p465", "LSTPMTAMT")] 
     
@@ -146,10 +158,10 @@ createoutbound <- function(master){
   
   ASSIGNED <- EXPERIANoutbound$ASSIGNED
   
-  ASSIGNED <- str_extract(EXPERIANoutbound$ASSIGNED, "\\d(.*)\\d")
+#   ASSIGNED <- str_extract(EXPERIANoutbound$ASSIGNED, "\\d(.*)\\d")
   
   #numbers over 999 have commas, need to strip out to properly turn to numeric
-  ASSIGNED <- gsub(",","", ASSIGNED)
+  ASSIGNED1 <- gsub(",","", ASSIGNED)
   
   #make whole number and nine digits with leading zeros
   ASSIGNED <- sprintf("%09d", round(as.numeric(ASSIGNED),0))
@@ -158,21 +170,21 @@ createoutbound <- function(master){
   EXPERIANoutbound$ASSIGNED <- ASSIGNED
   
   #Filename must be CA.C0550263.S2299570.FILE1.TXT
-  write.table(EXPERIANoutbound, "./scripts/prepped_outbound/CA.C0550263.S2299570.FILE1.TXT", sep=",", na="", row.names=FALSE, col.names=FALSE)
+  write.table(EXPERIANoutbound, "./TSLOoutbound/CA.C0550263.S2299570.FILE1.TXT", sep=",", na="", row.names=FALSE, col.names=FALSE)
   
   
   ########OneClick Outbound########
   #Needs
   #"UDH.AccountID","SSN", "LName", "FName", "Street.1", "City", "State", "Zip.Code"
-  ONECLICKoutbound <- master[, c("ACCT","SSN", "LNAM", "FNAM", "ADD1", "CITY", "STATE", "ZIP")]
-  write.csv(ONECLICKoutbound, "./scripts/prepped_outbound/ONECLICKoutbound.csv", row.names=FALSE)
+  ONECLICKoutbound <- master[, c("ACCT","SSN", "LNAME", "FNAME", "ADD1", "CITY", "STATE", "ZIP")]
+  write.csv(ONECLICKoutbound, paste("./TSLOoutbound/", "ONECLICKoutbound_", Sys.Date(), ".csv", sep=""), row.names=FALSE)
   
   
   ########WebRecon####
   #Needs
   #full name, zip, state, account
-  WEBRECONoutbound <- master[, c("FNAM","LNAM", "ZIP", "STATE", "ACCT")]
-  write.csv(WEBRECONoutbound, "./scripts/prepped_outbound/WEBRECONoutbound.csv", row.names=FALSE)
+  WEBRECONoutbound <- master[, c("FNAME","LNAME", "ZIP", "STATE", "ACCT")]
+  write.csv(WEBRECONoutbound, paste("./TSLOoutbound/", "WEBRECONoutbound_", Sys.Date(), ".csv", sep=""), row.names=FALSE)
   
-  print("Outbound files have been created and are in the 'prepped_outbound' forward directory.")
+  print("Outbound files have been created and are in the forward directory.")
 }
