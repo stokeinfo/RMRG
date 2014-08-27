@@ -1,7 +1,21 @@
 #Rocky Mountain Recovery Group 5/29/14
 #Function for creating outbound data files to vendors
-#master arg in function is the prepped and ready master file.
-createoutbound <- function(master){
+#   Notes
+#   'master' is the master new biz data frame returned from prepmaster()
+#   'batchname' is the name of the new biz data batch (i.e. where it came from)
+
+createoutbound <- function(master, batchname=NULL){
+  
+  
+  if(is.null(batchname)){
+    stop("must provide batch name for new biz data")
+  }
+  
+  batchfolder <- paste(batchname, "outbound", sep="")
+  
+  if(!file.exists(batchfolder)){
+    dir.create(batchfolder)
+  }
   
   #######CBC Outbound#######
   
@@ -31,12 +45,8 @@ createoutbound <- function(master){
   # #validation
   # which(df$SSN %in% unique(CBCoutbound$SSN[duplicated(CBCoutbound$SSN)]))
   
-  if(!file.exists("TSLOoutbound")){
-    dir.create("TSLOoutbound")
-  }
-  
   #create outbound csv
-  write.csv(CBCoutbound, paste("./TSLOoutbound/", "CBCoutbound_", Sys.Date(), ".csv", sep=""), row.names=FALSE)
+  write.csv(CBCoutbound, paste("./", batchfolder, "/", batchname,"_CBCoutbound_", Sys.Date(), ".csv", sep=""), row.names=FALSE)
   
   
   ########Credit Score Outbound########
@@ -169,21 +179,21 @@ createoutbound <- function(master){
   EXPERIANoutbound$ASSIGNED <- ASSIGNED
   
   #Filename must be CA.C0550263.S2299570.FILE1.TXT
-  write.table(EXPERIANoutbound, "./TSLOoutbound/CA.C0550263.S2299570.FILE1.TXT", sep=",", na="", row.names=FALSE, col.names=FALSE, quote=FALSE)
+  write.table(EXPERIANoutbound, paste("./", batchfolder, "/CA.C0550263.S2299570.FILE1.TXT", sep=""), sep=",", na="", row.names=FALSE, col.names=FALSE, quote=FALSE)
   
   
   ########OneClick Outbound########
   #Needs
   #"UDH.AccountID","SSN", "LName", "FName", "Street.1", "City", "State", "Zip.Code"
   ONECLICKoutbound <- master[, c("ACCT","SSN", "LNAME", "FNAME", "ADD1", "CITY", "STATE", "ZIP")]
-  write.csv(ONECLICKoutbound, paste("./TSLOoutbound/", "ONECLICKoutbound_", Sys.Date(), ".csv", sep=""), row.names=FALSE)
+  write.csv(ONECLICKoutbound, paste("./", batchfolder, "/", batchname, "_ONECLICKoutbound_", Sys.Date(), ".csv", sep=""), row.names=FALSE)
   
   
   ########WebRecon####
   #Needs
   #full name, zip, state, account
   WEBRECONoutbound <- master[, c("FNAME","LNAME", "ZIP", "STATE", "ACCT")]
-  write.csv(WEBRECONoutbound, paste("./TSLOoutbound/", "WEBRECONoutbound_", Sys.Date(), ".csv", sep=""), row.names=FALSE)
+  write.csv(WEBRECONoutbound, paste("./", batchfolder, "/", batchname,  "_WEBRECONoutbound_", Sys.Date(), ".csv", sep=""), row.names=FALSE)
   
   print("Outbound files have been created and are in the forward directory.")
 }
