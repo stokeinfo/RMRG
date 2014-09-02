@@ -1,9 +1,7 @@
-adsphones <- function(cbcUP, oneclickUP){
+adsphones <- function(master, cbc, oneclick){
   #where cbcUP and oneclickUP are dataframes of inbound data from cbc and oneclick
   
-  ########OneClick Merge#######
-  oneclick <- read.csv("./inbound/RMRG_1291_RMRG_1291_RockyMountainPurchased523OneClick.csv", sep=",", header=TRUE, stringsAsFactors=FALSE)
-  
+  ########OneClick Merge#######  
   # Checking numbers from OneClick against those in master
   #home phone numbers
   newhome <- which(oneclick$out_HomePhone != "" 
@@ -35,7 +33,6 @@ adsphones <- function(cbcUP, oneclickUP){
                   & !(oneclick$out_Ref1Phone %in% master$REFPHONE))
   #length(newref)
   #all(!(oneclick$out_Ref1Phone[newref] %in% master$RefPhone))
-  
   
   
   #subset dataframes of new phones with associated SSN and add rows for action codes
@@ -80,35 +77,14 @@ adsphones <- function(cbcUP, oneclickUP){
   #reorder columns
   oneclick2 <- oneclick2[, c("SSN", "PHONE", "CONTACT", "ACTIONCODE")]
   
-  # #oneclick is dirty data...numbers aren't repeats against the same class in the master file
-  # #but they are repeats against different classes
-  # all(!(oneclick2$PHONE %in% master$Home.Phone.Number))
-  # all(!(oneclick2$PHONE %in% master$Work.Phone.Number))
-  # all(!(oneclick2$PHONE %in% master$Cell.Phone.Number))
-  # all(!(oneclick2$PHONE %in% master$RefPhone))
-  # 
-  # #4 dataframes below show cross class repeats in the data from Oneclick. It's more than 25% of data from OneClick
-  # length(which(oneclick2$PHONE %in% master$Home.Phone.Number)) #24 are repeats against home phones in master
-  # OChomerepeats <- oneclick2[which(oneclick2$PHONE %in% master$Home.Phone.Number), ]
-  # 
-  # length(which(oneclick2$PHONE %in% master$Work.Phone.Number)) #32 are repeats against work in master
-  # OCworkrepeats <- oneclick2[which(oneclick2$PHONE %in% master$Work.Phone.Number), ]
-  # 
-  # length(which(oneclick2$PHONE %in% master$Cell.Phone.Number)) #466 are repeats against cells in master
-  # OCcellrepeats <- oneclick2[which(oneclick2$PHONE %in% master$Cell.Phone.Number), ]
-  # 
-  # length(which(oneclick2$PHONE %in% master$RefPhone)) #28 are repeats against reference phones in master
-  # OCreferencerepeats <- oneclick2[which(oneclick2$PHONE %in% master$RefPhone), ]
+
+  ########CBC Merge########
   
-  
-  ########CBC########
-  
-  CBCinbound <- read.csv("./inbound/CBC_inbound.csv", header=FALSE, stringsAsFactors=FALSE)[, 1:10]
-  
-  CBCinboundnames <- c("SSN", "FNAME", "LNAME", "ADD1", "CITY", "STATE",
+    
+  cbcnames <- c("SSN", "FNAME", "LNAME", "ADD1", "CITY", "STATE",
                        "ZIP", "HOMEPHONE", "ADDPHONE1", "MOBILEPHONE")
   
-  names(CBCinbound) <- CBCinboundnames
+  names(cbc) <- cbcnames
   #rm(CBCinboundnames)
   
   
@@ -116,9 +92,9 @@ adsphones <- function(cbcUP, oneclickUP){
   #   CBCoutbound <- read.csv("./scripts/prepped_outbound/CBCoutbound.csv", sep=",", header=TRUE, stringsAsFactors=FALSE)
   
   
-  newhome <- which(CBCinbound$HOMEPHONE != "" 
-                   & !is.na(CBCinbound$HOMEPHONE)
-                   & !(CBCinbound$HOMEPHONE %in% master$HOMEPHONE)) 
+  newhome <- which(cbc$HOMEPHONE != "" 
+                   & !is.na(cbc$HOMEPHONE)
+                   & !(cbc$HOMEPHONE %in% master$HOMEPHONE)) 
   
   
   newmobile <- which(CBCinbound$MOBILEPHONE != "" 
