@@ -4,7 +4,7 @@ prepmaster <- function(folder=NULL, filename=NULL){
 #   'folder' is the forward directory that contains the new biz data. Always named the date the new biz data was recieved
 #   filename string is whatever the filename is of the master new biz data
   
-  setwd("C:/Users/Jonathan/Desktop/Stoke Informatics/Clients/RMRG")
+  setwd("C:/Users/Jonathan/Desktop/Stoke Informatics/Clients/RMRG/Projects/DataFormatting")
   
 #   check to make sure arguments entered correctly
   if(is.null(folder)){
@@ -16,9 +16,9 @@ prepmaster <- function(folder=NULL, filename=NULL){
   }
   
   #read in master file
-  setwd(paste("./", folder, sep=""))
+#   setwd(paste("./", folder, sep=""))
     
-  master <- read.csv(filename, sep=",", header=TRUE, stringsAsFactors=FALSE)
+  master <- read.csv(paste("./", folder, "/", filename, sep=""), header=TRUE, stringsAsFactors=FALSE)
   
   #which columns start with "X"... delete
   deletecolumns <- grep("^X", names(master))

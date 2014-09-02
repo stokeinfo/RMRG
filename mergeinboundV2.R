@@ -1,7 +1,16 @@
 #Rocky Mountain Recovery Group 6/4/14
 #Script for merging inbound data from vendors into master file
 #master arg in function is the prepped and ready master file.
-mergeinbound <- function(master){
+mergeinbound <- function(master, productname=NULL){
+  
+  if(is.null(productname)){
+    stop("must provide a product name")
+  }
+  
+  #create 'upload' forward directory for newly merged files
+  if(!file.exists(upload)){
+    dir.create(upload)
+  }
   
   ########OneClick Merge#######
   oneclick <- read.csv("./inbound/RMRG_1291_RMRG_1291_RockyMountainPurchased523OneClick.csv", sep=",", header=TRUE, stringsAsFactors=FALSE)
@@ -41,7 +50,7 @@ mergeinbound <- function(master){
   
   
   #subset dataframes of new phones with associated SSN and add rows for action codes
-  OCnames <- c("SSN", "PHONE", "FNAM", "LNAM")
+  OCnames <- c("SSN", "PHONE", "FNAME", "LNAME")
   OCnewhomedf <- oneclick[newhome, c("SSN", "out_HomePhone", "FirstName", "LastName")]
   names(OCnewhomedf) <- OCnames
   if(length(newhome) > 0){
@@ -77,7 +86,7 @@ mergeinbound <- function(master){
   # rm(OCnewhomedf, OCnewworkdf, OCnewmobiledf, OCnewrefdf, newhome, newwork, newmobile, newref)
   
   #concatenate first and last names with OC: at the beginning to indicate OneClick
-  oneclick2$CONTACT <- paste("OC:", oneclick2$FNAM, oneclick2$LNAM)
+  oneclick2$CONTACT <- paste("OC:", oneclick2$FNAME, oneclick2$LNAME)
   
   #reorder columns
   oneclick2 <- oneclick2[, c("SSN", "PHONE", "CONTACT", "ACTIONCODE")]
@@ -107,52 +116,52 @@ mergeinbound <- function(master){
   
   CBCinbound <- read.csv("./inbound/CBC_inbound.csv", header=FALSE, stringsAsFactors=FALSE)[, 1:10]
   
-  CBCinboundnames <- c("SSN", "FNAM", "LNAM", "ADD1", "CITY", "STATE",
+  CBCinboundnames <- c("SSN", "FNAME", "LNAME", "ADD1", "CITY", "STATE",
                        "ZIP", "HOMEPHONE", "ADDPHONE1", "MOBILEPHONE")
   
-  colnames(CBCinbound) <- CBCinboundnames
+  names(CBCinbound) <- CBCinboundnames
   #rm(CBCinboundnames)
   
   
-  #compare homephones in inbound to those in outbound. In the future this will get compared to the master file
-  CBCoutbound <- read.csv("./scripts/prepped_outbound/CBCoutbound.csv", sep=",", header=TRUE, stringsAsFactors=FALSE)
+#   compare homephones in inbound to those in outbound. In the future this will get compared to the master file
+#   CBCoutbound <- read.csv("./scripts/prepped_outbound/CBCoutbound.csv", sep=",", header=TRUE, stringsAsFactors=FALSE)
   
   
   newhome <- which(CBCinbound$HOMEPHONE != "" 
                    & !is.na(CBCinbound$HOMEPHONE)
-                   & !(CBCinbound$HOMEPHONE %in% CBCoutbound$HOMEPHONE)) 
+                   & !(CBCinbound$HOMEPHONE %in% master$HOMEPHONE)) 
   
   
   newmobile <- which(CBCinbound$MOBILEPHONE != "" 
                      & !is.na(CBCinbound$MOBILEPHONE)
-                     & !(CBCinbound$MOBILEPHONE %in% CBCoutbound$MOBILEPHONE))
+                     & !(CBCinbound$MOBILEPHONE %in% master$MOBILEPHONE))
   
   #ignore the extensions in the addl phones
   CBCinbound$ADDPHONE1 <- substr(CBCinbound$ADDPHONE1, 1, 10)
   
   addlmobile <- which(CBCinbound$ADDPHONE1 != "" 
                       & !is.na(CBCinbound$ADDPHONE1)
-                      & !(CBCinbound$ADDPHONE1 %in% CBCoutbound$HOMEPHONE)
-                      & !(CBCinbound$ADDPHONE1 %in% CBCoutbound$MOBILEPHONE))
+                      & !(CBCinbound$ADDPHONE1 %in% master$HOMEPHONE)
+                      & !(CBCinbound$ADDPHONE1 %in% master$MOBILEPHONE))
   
   #subset dataframes of new phones with associated SSN and add rows for action codes
-  CBCnames <- c("SSN", "PHONE", "FNAM", "LNAM")
+  CBCnames <- c("SSN", "PHONE", "FNAME", "LNAME")
   
-  CBCnewhomedf <- CBCinbound[newhome, c("SSN", "HOMEPHONE", "FNAM", "LNAM")]
+  CBCnewhomedf <- CBCinbound[newhome, c("SSN", "HOMEPHONE", "FNAME", "LNAME")]
   names(CBCnewhomedf) <- CBCnames
   if(length(newhome) > 0){
     CBCnewhomedf$ACTIONCODE <- "HOME"
   }
   
   
-  CBCnewmobiledf <- CBCinbound[newmobile, c("SSN", "MOBILEPHONE", "FNAM", "LNAM")]
+  CBCnewmobiledf <- CBCinbound[newmobile, c("SSN", "MOBILEPHONE", "FNAME", "LNAME")]
   names(CBCnewmobiledf) <- CBCnames
   if(length(newmobile) > 0){
     CBCnewmobiledf$ACTIONCODE <- "MOBILE"
   }
   
   
-  CBCaddldf <- CBCinbound[addlmobile, c("SSN", "ADDPHONE1", "FNAM", "LNAM")]
+  CBCaddldf <- CBCinbound[addlmobile, c("SSN", "ADDPHONE1", "FNAME", "LNAME")]
   names(CBCaddldf) <- CBCnames
   if(length(addlmobile) > 0){
     CBCaddldf$ACTIONCODE <- "ADDITIONAL"
@@ -167,7 +176,7 @@ mergeinbound <- function(master){
   # rm(CBCnewhomedf, CBCnewmobiledf, CBCaddldf, newhome, newmobile, addlmobile)
   
   #concatenate first and last names with OC: at the beginning to indicate OneClick
-  CBCinbound2$CONTACT <- paste("CBC:", CBCinbound2$FNAM, CBCinbound2$LNAM)
+  CBCinbound2$CONTACT <- paste("CBC:", CBCinbound2$FNAME, CBCinbound2$LNAME)
   
   #reorder
   CBCinbound2 <- CBCinbound2[, c("SSN", "PHONE", "CONTACT", "ACTIONCODE")]
@@ -180,7 +189,7 @@ mergeinbound <- function(master){
   #rbind oneclick and CBC together
   ADSphones <- rbind(oneclick2, CBCinbound2)
   
-  write.csv(ADSphones, file="./scripts/toupload/ADSphones.csv", row.names=FALSE)
+  write.csv(ADSphones, file=paste("./upload/",productname,"_ADSphones_", Sys.Date(),".csv"), row.names=FALSE)
   
   
   ########Experian Merge########
@@ -188,11 +197,11 @@ mergeinbound <- function(master){
   
   EXPERIANinbound <- read.table("./inbound/COLL.C0550263.S2299570.060514.15323683.TXT", sep=",", header=TRUE)
   
-  #WILL NEED TO CONFIRM COLUMN NAME OF ACCOUNTS IN THE EXPERIAN RESULTS
-  scorerows <- which(EXPERIANinbound$ACCT %in% master$ACCT)
+  #WILL NEED TO CONFIRM COLUMN NAME OF ACCOUNTS IN THE EXPERIAN RESULTS... it's ACCOUNT.NUMBER
+  scorerows <- which(EXPERIANinbound$ACCOUNT.NUMBER %in% master$ACCT)
   
   #create subset of SSN and scores
-  EXPresults <- EXPERIANinbound[scorerows, c("ACCT", "SCORE.OR.EXCLUSION.1","X...SCR.FACTOR.CDS..1")]
+  EXPresults <- EXPERIANinbound[scorerows, c("ACCOUNT.NUMBER", "SCORE.OR.EXCLUSION.1","X...SCR.FACTOR.CDS..1")]
   
   # #block below will not be necessary in the future since account ids will be used
   # ############Inspecting for duplicates in EXPresults##############
@@ -265,7 +274,7 @@ mergeinbound <- function(master){
   
   #change score name to something readable 
   
-  colnames(master2)[46:47] <- c("INCSCORE","DOLLARSCORE")
+  names(master2)[46:47] <- c("INCSCORE","DOLLARSCORE")
   
   
   ########WebRecon########
@@ -287,7 +296,7 @@ mergeinbound <- function(master){
   # all(master2[master2$LitigiousAccount == "Y", "UDH.AccountID"] %in% litigiousaccounts)
   
   #write the final merged file
-  write.csv(master2, file="./scripts/toupload/mergedmaster.csv", row.names=FALSE)
+  write.csv(master2, file=paste("./upload/",productname, "_MERGED_", Sys.Date(), sep=""), row.names=FALSE)
   
   print("All inbound files have been merged and are now ready to uploade to ADS. Prepped files are in the 'toupload' forward directory")
 }

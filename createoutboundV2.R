@@ -4,12 +4,19 @@
 #   'master' is the master new biz data frame returned from prepmaster()
 #   'batchname' is the name of the new biz data batch (i.e. where it came from)
 
-createoutbound <- function(master, batchname=NULL){
+createoutbound <- function(master, folder=NULL, batchname=NULL){
   
+  if(is.null(folder)){
+    stop("must provide folder name that contains the master file")
+  }
   
   if(is.null(batchname)){
     stop("must provide batch name for new biz data")
   }
+  
+  directory <- paste("C:/Users/Jonathan/Desktop/Stoke Informatics/Clients/RMRG/Projects/DataFormatting/", folder, sep="")
+  
+  setwd(directory)  
   
   batchfolder <- paste(batchname, "outbound", sep="")
   
@@ -167,10 +174,10 @@ createoutbound <- function(master, batchname=NULL){
   
   ASSIGNED <- EXPERIANoutbound$ASSIGNED
   
-#   ASSIGNED <- str_extract(EXPERIANoutbound$ASSIGNED, "\\d(.*)\\d")
+  ASSIGNED <- str_extract(EXPERIANoutbound$ASSIGNED, "\\d(.*)\\d")
   
   #numbers over 999 have commas, need to strip out to properly turn to numeric
-  ASSIGNED1 <- gsub(",","", ASSIGNED)
+  ASSIGNED <- gsub(",","", ASSIGNED)
   
   #make whole number and nine digits with leading zeros
   ASSIGNED <- sprintf("%09d", round(as.numeric(ASSIGNED),0))
