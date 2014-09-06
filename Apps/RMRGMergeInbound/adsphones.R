@@ -97,37 +97,37 @@ adsphones <- function(master, cbc, oneclick){
                    & !(cbc$HOMEPHONE %in% master$HOMEPHONE)) 
   
   
-  newmobile <- which(CBCinbound$MOBILEPHONE != "" 
-                     & !is.na(CBCinbound$MOBILEPHONE)
-                     & !(CBCinbound$MOBILEPHONE %in% master$MOBILEPHONE))
+  newmobile <- which(cbc$MOBILEPHONE != "" 
+                     & !is.na(cbc$MOBILEPHONE)
+                     & !(cbc$MOBILEPHONE %in% master$MOBILEPHONE))
   
   #ignore the extensions in the addl phones
-  CBCinbound$ADDPHONE1 <- substr(CBCinbound$ADDPHONE1, 1, 10)
+  cbc$ADDPHONE1 <- substr(cbc$ADDPHONE1, 1, 10)
   
-  addlmobile <- which(CBCinbound$ADDPHONE1 != "" 
-                      & !is.na(CBCinbound$ADDPHONE1)
-                      & !(CBCinbound$ADDPHONE1 %in% master$HOMEPHONE)
-                      & !(CBCinbound$ADDPHONE1 %in% master$MOBILEPHONE))
+  addlmobile <- which(cbc$ADDPHONE1 != "" 
+                      & !is.na(cbc$ADDPHONE1)
+                      & !(cbc$ADDPHONE1 %in% master$HOMEPHONE)
+                      & !(cbc$ADDPHONE1 %in% master$MOBILEPHONE))
   
   #subset dataframes of new phones with associated SSN and add rows for action codes
-  CBCnames <- c("SSN", "PHONE", "FNAME", "LNAME")
+  outnames <- c("SSN", "PHONE", "FNAME", "LNAME")
   
-  CBCnewhomedf <- CBCinbound[newhome, c("SSN", "HOMEPHONE", "FNAME", "LNAME")]
-  names(CBCnewhomedf) <- CBCnames
+  CBCnewhomedf <- cbc[newhome, c("SSN", "HOMEPHONE", "FNAME", "LNAME")]
+  names(CBCnewhomedf) <- outnames
   if(length(newhome) > 0){
     CBCnewhomedf$ACTIONCODE <- "HOME"
   }
   
   
-  CBCnewmobiledf <- CBCinbound[newmobile, c("SSN", "MOBILEPHONE", "FNAME", "LNAME")]
-  names(CBCnewmobiledf) <- CBCnames
+  CBCnewmobiledf <- cbc[newmobile, c("SSN", "MOBILEPHONE", "FNAME", "LNAME")]
+  names(CBCnewmobiledf) <- outnames
   if(length(newmobile) > 0){
     CBCnewmobiledf$ACTIONCODE <- "MOBILE"
   }
   
   
-  CBCaddldf <- CBCinbound[addlmobile, c("SSN", "ADDPHONE1", "FNAME", "LNAME")]
-  names(CBCaddldf) <- CBCnames
+  CBCaddldf <- cbc[addlmobile, c("SSN", "ADDPHONE1", "FNAME", "LNAME")]
+  names(CBCaddldf) <- outnames
   if(length(addlmobile) > 0){
     CBCaddldf$ACTIONCODE <- "ADDITIONAL"
   }
@@ -135,25 +135,28 @@ adsphones <- function(master, cbc, oneclick){
   
   
   #rbind 
-  CBCinbound2 <- rbind(CBCnewhomedf, CBCnewmobiledf, CBCaddldf)
+  cbc2 <- rbind(CBCnewhomedf, CBCnewmobiledf, CBCaddldf)
   
   # #remove objects to clean up environment. Don't need if this is a function
   # rm(CBCnewhomedf, CBCnewmobiledf, CBCaddldf, newhome, newmobile, addlmobile)
   
   #concatenate first and last names with OC: at the beginning to indicate OneClick
-  CBCinbound2$CONTACT <- paste("CBC:", CBCinbound2$FNAME, CBCinbound2$LNAME)
+  cbc2$CONTACT <- paste("CBC:", cbc2$FNAME, cbc2$LNAME)
   
   #reorder
-  CBCinbound2 <- CBCinbound2[, c("SSN", "PHONE", "CONTACT", "ACTIONCODE")]
+  cbc2 <- cbc2[, c("SSN", "PHONE", "CONTACT", "ACTIONCODE")]
   
   #duplicates to oneclick?
-  print(paste(length(which(CBCinbound2$PHONE %in% oneclick2$PHONE)), "records in CBC are duplicates to OneClick, deleting duplicate records now..."))
+  print(paste(length(which(cbc2$PHONE %in% oneclick2$PHONE)), "records in CBC are duplicates to OneClick, deleting duplicate records now..."))
   
-  CBCinbound2 <- CBCinbound2[!CBCinbound2$PHONE %in% oneclick2$PHONE, ]
+  cbc2 <- cbc2[!cbc2$PHONE %in% oneclick2$PHONE, ]
   
   #rbind oneclick and CBC together
-  ADSphones <- rbind(oneclick2, CBCinbound2)
+  ADSphones <- rbind(oneclick2, cbc2)
+  return(ADSphones)
   
-  write.csv(ADSphones, file=paste("./upload/",productname,"_ADSphones_", Sys.Date(),".csv"), row.names=FALSE)
+#   write.csv(ADSphones, file=paste("./upload/",productname,"_ADSphones_", Sys.Date(),".csv"), row.names=FALSE)
+  
+  
   
 }
