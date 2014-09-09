@@ -47,7 +47,7 @@ shinyUI(fluidPage(
       h4("Step 6: Download merged phone numbers (ADSphones.csv) for ADS LaunchPad"),
       downloadButton("ADSphones", "Download"),
       h4("Step 7: Download complete merged master new biz file"),
-      downloadButton("mergedmaster", "Download")
+      downloadButton("merged", "Download")
       
       )
     )

@@ -1,6 +1,10 @@
 #MergeInbound server.R script
-source(adsphones.R)
-source(prepmasterV2_shiny.R)
+source("prepmasterV2_shiny.R")
+source("adsphones.R")
+source("mergedmaster.R")
+
+#line below increases the allowed file size to 100MB
+options(shiny.maxRequestSize=30*1024^2)
 
 shinyServer(function(input, output){
   
@@ -16,6 +20,7 @@ shinyServer(function(input, output){
     
     #prepping master
     prepmaster(master)
+  })
     
   ADSphones <- reactive({
     
@@ -31,7 +36,7 @@ shinyServer(function(input, output){
     if(is.null(oneclickIN)){
       return(NULL)
     }
-    oneclick <- read.csv(onclickIN$datapath, header=T, sep=",", stringsAsFactors=FALSE)
+    oneclick <- read.csv(oneclickIN$datapath, header=T, sep=",", stringsAsFactors=FALSE)
     
     #now create ADSphones dataframe with adsphones function
     adsphones(master=master(), cbc=cbc, oneclick=oneclick)
@@ -40,24 +45,24 @@ shinyServer(function(input, output){
     
     
   #merge experian and webrecon data into mergedmaster in reactive function
-  mergedmaster <- reactive({
+  merged <- reactive({
     
     #reading in experian
     experianIN <- input$experianUP
     if(is.null(experianIN)){
       return(NULL)
     }
-    experian <- read.table(experianIN$datapath, sep=",", header=TRUE)
+    exp <- read.table(experianIN$datapath, sep=",", header=TRUE)
     
     #reading in webrecon
     webreconIN <- input$webreconUP
     if(is.null(webreconIN)){
       return(NULL)
     }
-    webrecon <- read.csv(webreconIN$datapath, header=TRUE, sep=",", stringsAsFactors=FALSE)
+    wr <- read.csv(webreconIN$datapath, header=TRUE, sep=",", stringsAsFactors=FALSE)
     
     #now create mergedmaster by sending to mergedmaster.R
-    mergedmaster(master=master, experian=experian, webrecon=webrecon)    
+    mergedmaster(master=master(), experian=exp, webrecon=wr)    
     
   })
   
@@ -69,10 +74,10 @@ shinyServer(function(input, output){
       write.csv(ADSphones(), file)
     })
   
-  output$ADSphones <- downloadHandler(
+  output$merged <- downloadHandler(
     filename = function(){paste("mergedmaster_", Sys.Date(), ".csv", sep="")},
     content = function(file){
-      write.csv(mergedmaster(), file)
+      write.csv(merged(), file)
     })
   
   

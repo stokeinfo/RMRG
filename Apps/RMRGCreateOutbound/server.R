@@ -21,12 +21,12 @@ shinyServer(function(input, output){
     
     master <- prepmaster(master)
     
-    outfile <- switch(input$filechoice, 
-                     "CBC" = "CBC",
-                     "OneClick" = "OneClick",
-                     "WebRecon" = "WebRecon",
-                     "Experian" = "Experian"
-                     )
+#     outfile <- switch(input$filechoice, 
+#                      "CBC" = "CBC",
+#                      "OneClick" = "OneClick",
+#                      "WebRecon" = "WebRecon",
+#                      "Experian" = "Experian"
+#                      )
     
   createoutbound(master, filechoice=input$filechoice)    
   })

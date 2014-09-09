@@ -8,11 +8,11 @@ mergedmaster <- function(master, experian, webrecon){
   experian <- experian[scorerows, c("ACCOUNT.NUMBER", "SCORE.OR.EXCLUSION.1","X...SCR.FACTOR.CDS..1")]
   
   #merge 
-  master <- merge(master, experian, by.x="ACCT", by.y="ACCT", all.y=TRUE)
+  master <- merge(master, experian, by.x="ACCT", by.y="ACCOUNT.NUMBER", all.y=TRUE)
   
   #change score name to something readable 
   
-  names(master)[46:47] <- c("INCSCORE","DOLLARSCORE")
+  names(master)[37:38] <- c("INCSCORE","DOLLARSCORE")
   
   
   ###WebRecon  
